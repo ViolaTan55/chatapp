@@ -91,6 +91,13 @@ li {
     align-items: center;
 }
 
+.header {
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .message-actions {
     display: flex;
     gap: 8px;
@@ -139,21 +146,25 @@ li {
     padding: 16px;
     border-radius: 8px;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.3s ease;
     color: rgb(59, 59, 59);
     text-align: center;
     font-weight: 500;
+    animation: slideIn 0.3s ease-out;
 }
 
 .group-chat-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: #fff;
+    animation: pulse 0.5s ease-in-out;
 }
 
 .message {
     display: flex;
     flex-direction: column;
     margin: 8px 0;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .message-content {
@@ -161,6 +172,12 @@ li {
     padding: 8px 12px;
     border-radius: 12px;
     max-width: 70%;
+    transition: all 0.3s ease;
+}
+
+.message-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .message-sender {
@@ -281,6 +298,22 @@ li {
     color: #7cc686;
 }
 
+.clickable-image {
+    display: block;
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    clip-path: circle(50% at 50% 50%);
+    transition: transform .15s, box-shadow .15s;
+}
+  
+.clickable-image:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+  
+  
+
 .profile-header {
     margin-bottom: 20px;
     padding: 0 20px;
@@ -308,8 +341,12 @@ li {
     max-width: 600px;
     margin: 0 auto;
     padding: 20px;
-    background: #f8f9fa;
     border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.profile-view:hover {
+    /* box-shadow: 0 4px 12px rgba(0,0,0,0.1); */
 }
 
 .profile-view h2 {
@@ -324,4 +361,509 @@ li {
 .profile-view input[type="text"] {
     width: 100%;
     max-width: 400px;
+}
+
+/* Invitations Page Styles */
+.invitations-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.no-invitations {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+    font-style: italic;
+}
+
+.invitation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.invitation-item {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.invitation-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.group-name {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.inviter {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.invitation-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.invitation-actions button {
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.invitation-actions button:first-child {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.invitation-actions button:last-child {
+    background-color: #f44336;
+    color: white;
+}
+
+.group-invite-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.invite-link-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.invite-link-container input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.copied-message {
+    margin-top: 10px;
+    color: #4CAF50;
+    font-size: 0.9em;
+}
+
+.invite-link-section {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.invite-link-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.invite-link-container input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    font-size: 14px;
+}
+
+.invite-link-container button {
+    white-space: nowrap;
+}
+
+.copied-message {
+    margin-top: 10px;
+    color: #4CAF50;
+    font-size: 0.9em;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.join-group-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.join-group-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.join-group-form input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.error-message {
+    color: #dc3545;
+    margin-top: 10px;
+    font-size: 0.9em;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.debug-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.profile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.profile-item {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.profile-content {
+    flex: 1;
+    cursor: pointer;
+}
+
+.profile-content:hover {
+    color: #7cc686;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.delete-profile {
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.delete-profile:hover {
+    background-color: #c82333;
+}
+
+.profile-creation {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    color: #666;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.back-button:hover {
+    color: #7cc686;
+}
+
+.profile-item p {
+    margin: 5px 0;
+}
+
+.create-new-profile {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.create-new-profile:hover {
+    background: #45a049;
+}
+
+.debug-info {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.debug-info p {
+    margin: 5px 0;
+}
+
+/* Animation keyframes */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes smoothTransition {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Apply animations to elements */
+.message {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.group-chat-item {
+    animation: slideIn 0.3s ease-out;
+}
+
+.group-chat-item:hover {
+    animation: pulse 0.5s ease-in-out;
+}
+
+.profile-view {
+    animation: smoothTransition 0.4s ease-out;
+}
+
+/* Update existing styles to include animations */
+.message-content {
+    background: #f0f2f5;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 70%;
+    transition: all 0.3s ease;
+}
+
+.message-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.group-chat-item {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: rgb(59, 59, 59);
+    text-align: center;
+    font-weight: 500;
+}
+
+.group-chat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: #fff;
+}
+
+.profile-view {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.profile-view:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Profile animation keyframes */
+@keyframes expandFromProfile {
+    0% {
+        opacity: 0;
+        transform: scale(0.1);
+        transform-origin: top left;
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.5);
+        transform-origin: top left;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        transform-origin: top left;
+    }
+}
+
+@keyframes collapseToProfile {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+        transform-origin: top left;
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.5);
+        transform-origin: top left;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.1);
+        transform-origin: top left;
+    }
+}
+
+.profile-view {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    animation: expandFromProfile 0.4s ease-out;
+    position: relative;
+    z-index: 100;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.profile-view.closing {
+    animation: collapseToProfile 0.4s ease-in;
+}
+
+.profile-view:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+    margin-bottom: 20px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    color: #666;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 101;
+}
+
+.back-button:hover {
+    color: #7cc686;
+    transform: translateX(-5px);
+}
+
+.profile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    animation: fadeIn 0.3s ease-out forwards;
+    z-index: 99;
+}
+
+.profile-overlay.closing {
+    animation: fadeOut 0.3s ease-in forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.rumor-message {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+.rumor-badge {
+    display: inline-block;
+    background-color: #ffc107;
+    color: #000;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-left: 8px;
+    text-transform: uppercase;
+}
+
+.message-actions button {
+    margin-right: 4px;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+
+.message-actions button:hover {
+    background-color: #e0e0e0;
 }
