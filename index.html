@@ -18,6 +18,68 @@
     </head>
     <body>
         <div id="app">
+
+            <!-- load all groups -->
+            <graffiti-discover
+                v-slot="{ objects: groupObjects }"
+                :channels="['designftw']"
+                :schema="{
+                    properties: {
+                        value: {
+                            required: ['activity', 'object'],
+                            properties: {
+                                activity: { type: 'string' },
+                                object: {
+                                    type: 'object',
+                                    required: ['type', 'name', 'channel', 'members'],
+                                    properties: {
+                                        type: { type: 'string' },
+                                        name: { type: 'string' },
+                                        channel: { type: 'string' },
+                                        members: { type: 'array' },
+                                        boundaries: { type: 'array' },
+                                        isAnonymous: { type: 'boolean' },
+                                        creator: { type: 'string' },
+                                        createdAt: { type: 'number' }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }"
+                ref="groupDiscover"
+            >
+                <div style="display:none">
+                    {{ updateAvailableGroups(groupObjects) }}
+                </div>
+            </graffiti-discover>
+
+            <!-- always load all profiles -->
+            <graffiti-discover
+            v-slot="{ objects }"
+            :channels="['designftw']"
+            :schema="{
+                properties: {
+                    value: {
+                        required: ['name', 'describes', 'published'],
+                        properties: {
+                            name: { type: 'string' },
+                            describes: { type: 'string' },
+                            published: { type: 'number' },
+                            email: { type: 'string' },
+                            anonymized: { type: 'string' },
+                            boundaries: { type: 'array' },
+                            generator: { type: 'string' }
+                        }
+                    }
+                }
+            }"
+            ref="groupDiscover"
+            >
+                <div style="display:none">
+                    {{ updateAvailableProfiles(objects) }}
+                </div>
+            </graffiti-discover>
             
             <div v-if="!$graffitiSession.value">
                 <h1>Gossip App</h1>
@@ -29,7 +91,7 @@
                 <div v-if="newAccountSetup">
                     <h1>Welcome to the Gossip App</h1>
                     
-                    <!-- Profile Selection -->
+                    <!-- profile selection -->
                     <graffiti-discover
                         v-slot="{ objects: profileObjects }"
                         :channels="['designftw']"
@@ -61,7 +123,7 @@
                                     <div v-for="obj in profileObjects.filter(obj => obj.value.describes === $graffitiSession.value.actor)" 
                                          :key="obj.url" 
                                          class="profile-item">
-                                        <div class="profile-content" @click="selectProfile(obj.value)">
+                                        <div class="profile-content" @click="selectProfile(obj)">
                                             <p><strong>Name:</strong> {{ obj.value.name }}</p>
                                             <p><strong>Email:</strong> {{ obj.value.email }}</p>
                                             <p><strong>Anonymized:</strong> {{ obj.value.anonymized }}</p>
@@ -78,175 +140,62 @@
                         </div>
                     </graffiti-discover>
 
-                    <!-- Profile Creation Form -->
+                    <!-- profile creation -->
                     <div v-if="creatingNewProfile" class="profile-creation">
                         <h2>Create New Profile</h2>
                         <button @click="creatingNewProfile = false" class="back-button">← Back to Profiles</button>
-                    <profile-view
+                        <!-- <div class="clickable" @click="creatingNewProfile = false">
+                            <img class="clickable-image" src="img/back.png" style="max-height:80px;"/>
+                        </div> -->
+                        <profile-view
                             :profile="profile"
                             :is-editing="true"
                             :is-setup="true"
+                            :is-own-profile="!selectedProfile || (currentProfileId && selectedProfile && currentProfileId === selectedProfile.url)"
+                            :is-anonymous="selectedChannel ? currentGroupIsAnonymous : false"
                             @save="setupNewAccount"
-                    @add-boundary="addBoundary"
-                    @remove-boundary="removeBoundary"
-                    />
+                            @add-boundary="addBoundary"
+                            @remove-boundary="removeBoundary"
+                        />
                     </div>
                 </div>
                 <div v-else>
-                    <!-- Debug section to show saved profiles -->
-                    <!-- <div class="debug-section">
-                        <h3>Saved Profiles</h3>
-                        <graffiti-discover
-                            v-slot="{ objects: profileObjects }"
-                            :channels="['designftw', 'designftw-2025-studio2']"
-                            :schema="{
-                                properties: {
-                                    value: {
-                                        required: ['name', 'describes', 'published'],
-                                        properties: {
-                                            name: { type: 'string' },
-                                            describes: { type: 'string' },
-                                            published: { type: 'number' },
-                                            email: { type: 'string' },
-                                            anonymized: { type: 'string' },
-                                            boundaries: { type: 'array' },
-                                            generator: { type: 'string' }
-                                        }
-                                    }
-                                }
-                            }"
-                        >
-                            <div v-if="profileObjects.length === 0" class="no-profiles">
-                                No profiles found
-                            </div>
-                            <div v-else class="profile-list">
-                                <div v-for="obj in profileObjects" :key="obj.url" class="profile-item">
-                                    <p><strong>Name:</strong> {{ obj.value.name }}</p>
-                                    <p><strong>Email:</strong> {{ obj.value.email }}</p>
-                                    <p><strong>Anonymized:</strong> {{ obj.value.anonymized }}</p>
-                                    <p><strong>Boundaries:</strong> {{ obj.value.boundaries ? obj.value.boundaries.join(', ') : 'None' }}</p>
-                                    <p><strong>Published:</strong> {{ new Date(obj.value.published).toLocaleString() }}</p>
-                                </div>
-                            </div>
-                        </graffiti-discover>
-                    </div> -->
+                    <div v-if="viewingProfile">
+                        <!-- <div class="profile-header">
+                            <button class="back-button" @click="toggleProfileView">◀️ Back to Chat</button>
+                        </div> -->
 
-                    <div v-if="viewingInvitations">
-                        <div class="header">
-                            <div class="clickable" @click="toggleInvitationsView">
-                                <img class="clickable-image" src="img/home.png" style="max-height:80px;"/>
-                            </div>
-                            <h2>My Invitations</h2>
-                            <div class="clickable" @click="toggleCreatingGroup">
-                                <img class="clickable-image" src="img/plus.png" style="max-height:80px;"/>
-                            </div>
+                        <div class="clickable profile-header" @click="toggleProfileView">
+                            <img class="clickable-image" src="img/back.png" style="max-height:80px;"/>
                         </div>
-
-                        <div class="invitations-container">
-                            <graffiti-discover
-                                v-slot="{ objects: invitationObjects }"
-                                :channels="['invitations']"
-                                :schema="{
-                                    properties: {
-                                        value: {
-                                            required: ['groupName', 'inviter', 'status'],
-                                            properties: {
-                                                groupName: { type: 'string' },
-                                                inviter: { type: 'string' },
-                                                status: { type: 'string' },
-                                                groupId: { type: 'string' }
-                                            }
-                                        }
-                                    }
-                                }"
-                            >
-                                <div v-if="invitationObjects.length === 0" class="no-invitations">
-                                    No pending invitations
+                        <profile-view
+                            :profile="editingProfile ? profile : (selectedProfile || (existingProfile ? existingProfile.value : profile))"
+                            :is-editing="editingProfile"
+                            :is-own-profile="!selectedProfile || (currentProfileId && selectedProfile && currentProfileId === selectedProfile.url)"
+                            :is-anonymous="selectedChannel ? currentGroupIsAnonymous : false"
+                            @save="saveProfile($graffitiSession.value)"
+                            @start-edit="startEditingProfile"
+                            @add-boundary="addBoundary"
+                            @remove-boundary="removeBoundary"
+                        />
+                    </div>
+                    <template v-else>
+                        <!-- home page -->
+                        <div v-if="!selectedChannel">
+                            <!-- home page header -->
+                            <div class="header">
+                                <div class="clickable" @click="toggleProfileView">
+                                    <img class="clickable-image" src="img/profile.png" style="max-height:80px;"/>
                                 </div>
-                                <div v-else class="invitation-list">
-                                    <div v-for="invite in invitationObjects" :key="invite.url" class="invitation-item">
-                                        <div class="invitation-details">
-                                            <span class="group-name">{{ invite.value.groupName }}</span>
-                                            <span class="inviter">Invited by: {{ invite.value.inviter }}</span>
-                                        </div>
-                                        <div class="invitation-actions">
-                                            <button @click="acceptInvitation(invite)">Accept</button>
-                                            <button @click="declineInvitation(invite)">Decline</button>
-                                        </div>
+                                <h2>My Gossip Groups</h2>
+                                <div class="header-actions">
+                                    <div class="clickable create-group-trigger" @click="toggleCreatingGroup">
+                                        <img class="clickable-image" src="img/plus.png" style="max-height:80px;"/>
                                     </div>
                                 </div>
-                            </graffiti-discover>
-                        </div>
-
-                        <div v-if="creatingGroup">
-                            <h2>Create New Group</h2>
-                            <form @submit.prevent="createGroupChat($graffitiSession.value)">
-                                <fieldset :disabled="creating">
-                                    <input
-                                        type="text"
-                                        v-model="groupChatName"
-                                        placeholder="Group Name"
-                                        ref="nameInput"
-                                        v-focus
-                                    />
-                                    <input
-                                        type="submit"
-                                        :value="creating ? 'Creating...' : 'Create Group'"
-                                    />
-                                </fieldset>
-                            </form>
-                        </div>
-
-                        <div v-if="selectedGroup" class="group-invite-section">
-                            <h3>Invite to {{ selectedGroup.name }}</h3>
-                            <div class="invite-link-container">
-                                <input 
-                                    type="text" 
-                                    :value="inviteLink" 
-                                    readonly 
-                                    ref="inviteLinkInput"
-                                />
-                                <button @click="copyInviteLink">Copy Link</button>
                             </div>
-                            <div v-if="showCopiedMessage" class="copied-message">
-                                Link copied to clipboard!
-                            </div>
-                        </div>
-                </div>
-                <div v-else>
 
-                <div v-if="viewingProfile">
-                    <div class="profile-header">
-                        <button class="back-button" @click="toggleProfileView">◀️ Back to Chat</button>
-                    </div>
-                    <profile-view
-                        :profile="editingProfile ? profile : selectedProfile || existingProfile"
-                        :is-editing="editingProfile"
-                        @save="saveProfile($graffitiSession.value)"
-                        @start-edit="startEditingProfile"
-                        @add-boundary="addBoundary"
-                        @remove-boundary="removeBoundary"
-                        :class="{ 'closing': !viewingProfile }"
-                    />
-                </div>
-
-                <template v-else>
-                    <!-- home page -->
-                    <div v-if="!selectedChannel">
-
-                        <!-- home page header -->
-                        <div class="header">
-                            <div class="clickable" @click="toggleProfileView">
-                                <img class="clickable-image" src="img/lemur.png" style="max-height:80px;"/>
-                                <!-- My Profile -->
-                            </div>
-                            <h2>My Gossip Groups</h2>
-                            <div class="clickable" @click="toggleCreatingGroup">
-                                <img class="clickable-image" src="img/plus.png" style="max-height:80px;"/>
-                                <!-- Create Group -->
-                            </div>
-                        </div>
-
+                            <!-- join group -->
                             <div v-if="showJoinGroup" class="join-group-section">
                                 <h3>Join a Group</h3>
                                 <div class="join-group-form">
@@ -260,171 +209,293 @@
                                 </div>
                                 <div v-if="joinGroupError" class="error-message">
                                     {{ joinGroupError }}
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="group-chat-list">
-                            <graffiti-discover
-                                v-slot="{ objects: groupchatObjects, isInitialPolling }"
-                                :channels="['designftw']"
-                                :schema="{
-                                    properties: {
-                                        value: {
-                                            required: ['activity','object'],
+                            <!-- boundary comparison -->
+                            <div v-else-if="showBoundaryComparison" class="boundary-comparison-view">
+                                <div class="header">
+                                    <div class="clickable" @click="cancelGroupJoin">
+                                        <img class="clickable-image" src="img/back.png" style="max-height:80px;"/>
+                                    </div>
+                                    <h2>Boundary Comparison</h2>
+                                    <div style="width: 80px;"></div>
+                                </div>
+
+                                <div class="comparison-content">
+                                    <h3>Joining: {{ pendingGroupJoin?.group?.name }}</h3>
+                                    
+                                    <div v-if="boundaryDifferences.some(d => d.type === 'group_only')" class="differences-section">
+                                        <h4>Group Boundaries Not in Your Profile:</h4>
+                                        <div class="boundaries-list">
+                                            <div v-for="diff in boundaryDifferences.filter(d => d.type === 'group_only')" 
+                                                 :key="diff.type" 
+                                                 class="boundary-group">
+                                                <div v-for="boundary in diff.boundaries" 
+                                                     :key="boundary" 
+                                                     class="boundary-tag">
+                                                    {{ boundary }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="boundaryDifferences.some(d => d.type === 'personal_only')" class="differences-section">
+                                        <h4>Your Boundaries Not in Group:</h4>
+                                        <div class="boundaries-list">
+                                            <div v-for="diff in boundaryDifferences.filter(d => d.type === 'personal_only')" 
+                                                 :key="diff.type" 
+                                                 class="boundary-group">
+                                                <div v-for="boundary in diff.boundaries" 
+                                                     :key="boundary" 
+                                                     class="boundary-tag">
+                                                    {{ boundary }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="comparison-actions">
+                                        <button @click="completeGroupJoin(pendingGroupJoin.group, pendingGroupJoin.groupInfo)" 
+                                                class="accept-button">
+                                            Accept & Join Group
+                                        </button>
+                                        <button @click="cancelGroupJoin" class="cancel-button">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- group list -->
+                            <div v-else>
+                                <div class="group-chat-list">
+                                    <graffiti-discover
+                                        v-slot="{ objects: groupchatObjects, isInitialPolling }"
+                                        :channels="['designftw']"
+                                        :schema="{
                                             properties: {
-                                                activity: { type: 'string' },
-                                                object: {
-                                                    type: 'object',
-                                                    required: ['type','name','channel'],
+                                                value: {
+                                                    required: ['activity','object'],
                                                     properties: {
-                                                        type: { type: 'string' },
-                                                        name: { type: 'string' },
-                                                        channel: { type: 'string' }
+                                                        activity: { type: 'string' },
+                                                        object: {
+                                                            type: 'object',
+                                                            required: ['type','name','channel'],
+                                                            properties: {
+                                                                type: { type: 'string' },
+                                                                name: { type: 'string' },
+                                                                channel: { type: 'string' }
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
-                                }"
-                                @update:objects="updateGroupChats"
-                            >
-                                <div v-if="isInitialPolling" class="loading">Loading groups...</div>
-                                <template v-else>
-                                    <div 
-                                        v-for="object in groupchatObjects" 
-                                        :key="object.url" 
-                                        class="group-chat-item"
-                                        @click="selectGroupChat(object.value.object.channel, object.value.object.name)"
+                                        }"
                                     >
-                                        {{ object.value.object.name }}
-                                    </div>
-                                </template>
-                            </graffiti-discover>
+                                        <div style="display:none">
+                                            {{ updateGroupChats(groupchatObjects) }}
+                                        </div>
+                                        <div v-if="isInitialPolling" class="loading">Loading groups...</div>
+                                        <template v-else>
+                                            <div 
+                                                v-for="group in groupChats" 
+                                                :key="group.channel" 
+                                                class="group-chat-item"
+                                                @click="selectGroupChat(group.channel, group.name)"
+                                            >
+                                                {{ group.name }}
+                                            </div>
+                                        </template>
+                                    </graffiti-discover>
+                                </div>
+                            </div>
                         </div>
 
-                        <div v-if="creatingGroup">
-                            <h2>Create Gossip Group</h2>
-                            <form @submit.prevent="createGroupChat($graffitiSession.value)">
-                                <fieldset :disabled="creating">
+                        <!-- group chat -->
+                        <div v-else-if="selectedChannel" class="group-chat-view">
+                            <div class="header">
+                                <div class="clickable" @click="exitGroupChat">
+                                    <img class="clickable-image" src="img/back.png" style="max-height:80px;"/>
+                                </div>
+                                <h2>{{ currentGroupName }}</h2>
+                                <div class="group-boundaries" v-if="currentGroupBoundaries && currentGroupBoundaries.length > 0">
+                                    <span class="boundary-tag" v-for="boundary in currentGroupBoundaries" :key="boundary">
+                                        {{ boundary }}
+                                    </span>
+                                </div>
+                                <div class="clickable" @click="generateGroupInviteLink">
+                                    <img class="clickable-image" src="img/invite.png" style="max-height:80px;"/>
+                                </div>
+                            </div>
+
+                            <div v-if="showInviteLink" class="invite-link-section">
+                                <div class="invite-link-container">
+                                    <input 
+                                        type="text" 
+                                        :value="inviteLink" 
+                                        readonly 
+                                        ref="inviteLinkInput"
+                                    />
+                                    <button @click="copyInviteLink">Copy Link</button>
+                                </div>
+                                <div v-if="showCopiedMessage" class="copied-message">
+                                    Link copied to clipboard!
+                                </div>
+                            </div>
+
+                            <div class="messages-container">
+                                <graffiti-discover
+                                    v-slot="{ objects: messageObjects, isInitialPolling }"
+                                    :channels="messageChannels"
+                                    :schema="{
+                                        properties: {
+                                            value: {
+                                                required: ['content', 'published'],
+                                                properties: {
+                                                    content: { type: 'string' },
+                                                    published: { type: 'number' },
+                                                    isRumor: { type: 'boolean' }
+                                                }
+                                            }
+                                        }
+                                    }"
+                                >
+                                    <div v-if="isInitialPolling" class="loading">Loading...</div>
+                                    <div v-else class="message-list">
+                                        <div
+                                            v-for="object of messageObjects.sort((a, b) => a.value.published - b.value.published)"
+                                            :key="object.url"
+                                            class="message"
+                                            :class="[
+                                                { 'rumor-message': object.value.isRumor },
+                                                getIsMyMessage(object) ? 'my-message' : 'other-message'
+                                            ]"
+                                        >
+                                            <div class="message-sender clickable" @click="viewUserProfileById(object.value.profileId)">
+                                                {{ getProfileDisplayName(object.value.profileId, object.actor) }}
+                                                <span v-if="getIsMyMessage(object)">(you)</span>
+                                            </div>
+                                            <div :class="getIsMyMessage(object) ? 'my-message-content' : 'message-content'">
+                                                {{ object.value.content }}
+                                                <span v-if="object.value.isRumor" class="rumor-badge">RUMOR</span>
+                                            </div>
+                                            <div class="message-time">
+                                                {{ new Date(object.value.published).toLocaleTimeString() }}
+                                            </div>
+
+                                            <div class="message-actions">
+                                                <button @click="toggleRumor(object, $graffitiSession.value)">
+                                                    {{ object.value.isRumor ? 'Unmark Rumor' : 'Mark as Rumor' }}
+                                                </button>
+                                                <div v-if="getIsMyMessage(object)">
+                                                    <button @click="editMessage(object, $graffitiSession.value)">Edit</button>
+                                                    <button @click="deleteMessage(object, $graffitiSession.value)">Delete</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </graffiti-discover>
+                            </div>
+
+                            <form @submit.prevent="editingMessage ? saveEdit($graffitiSession.value) : sendMessage($graffitiSession.value)">
+                                <fieldset
+                                    :disabled="sending"
+                                    :class="getIsMyMessage(editingMessage || { value: { profileId: currentProfileId } }) ? 'my-message-fieldset' : 'other-message-fieldset'"
+                                >
                                     <input
                                         type="text"
-                                        v-model="groupChatName"
-                                        placeholder="My Group Chat"
-                                        ref="nameInput"
+                                        v-model="myMessage"
+                                        :placeholder="editingMessage ? 'Edit message...' : 'Type a message'"
+                                        ref="messageInput"
                                         v-focus
+                                        :class="getIsMyMessage(editingMessage || { value: { profileId: currentProfileId } }) ? 'my-message-input' : 'other-message-input'"
                                     />
                                     <input
                                         type="submit"
-                                        :value="creating ? 'Creating...' : 'Create'"
+                                        :value="sending ? 'Sending...' : (editingMessage ? 'Save Edit' : 'Send')"
                                     />
+                                    <button v-if="editingMessage" @click="editingMessage = null">Cancel</button>
                                 </fieldset>
                             </form>
                         </div>
-                    </div>
 
-                    <div v-else>
-                        <div class="header">
-                            <div class="clickable" @click="exitGroupChat">
-                                <img class="clickable-image" src="img/home.png" style="max-height:80px;"/>
-                                <!-- home -->
-                            </div>
-                            <h2>{{ currentGroupName }}</h2>
-
-                            <div class="clickable" @click="generateGroupInviteLink">
-                                <img class="clickable-image" src="img/invite.png" style="max-height:80px;"/>
-                                <!-- Invite a Friend -->
-                            </div>
-                        </div>
-                        <div>
-                                <div v-if="showInviteLink" class="invite-link-section">
-                                    <div class="invite-link-container">
-                                        <input 
-                                            type="text" 
-                                            :value="inviteLink" 
-                                            readonly 
-                                            ref="inviteLinkInput"
+                        <!-- create group -->
+                        <div v-if="creatingGroup" class="create-group-overlay">
+                            <div class="create-group-form">
+                                <button class="close-button" @click="toggleCreatingGroup">×</button>
+                                <h2>Create Gossip Group</h2>
+                                <form @submit.prevent="createGroupChat($graffitiSession.value)">
+                                    <fieldset :disabled="creating">
+                                        <input
+                                            type="text"
+                                            v-model="groupChatName"
+                                            placeholder="My Group Chat"
+                                            ref="nameInput"
+                                            v-focus
                                         />
-                                        <button @click="copyInviteLink">Copy Link</button>
-                                    </div>
-                                    <div v-if="showCopiedMessage" class="copied-message">
-                                        Link copied to clipboard!
-                                    </div>
-                                </div>
+                                        <div class="anonymous-toggle">
+                                            <label>
+                                                <input type="checkbox" v-model="isAnonymousGroup">
+                                                Anonymous Group (use anonymized names)
+                                            </label>
+                                        </div>
+                                        <div class="boundaries-container">
+                                            <p><strong>Group Boundaries:</strong></p>
+                                            <div class="boundaries-input">
+                                                <div class="selected-boundaries">
+                                                    <span v-for="boundary in groupBoundaries" :key="boundary" class="boundary-tag">
+                                                        {{ boundary }}
+                                                        <button @click="removeGroupBoundary(boundary)" class="remove-boundary">×</button>
+                                                    </span>
+                                                    <input 
+                                                        type="text" 
+                                                        v-model="newGroupBoundary" 
+                                                        placeholder="Add a new boundary"
+                                                        @keydown="handleGroupBoundaryKeydown"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div class="preset-boundaries">
+                                                <button 
+                                                    v-for="boundary in presetBoundaries" 
+                                                    :key="boundary"
+                                                    @click="addGroupBoundary(boundary)"
+                                                    :disabled="groupBoundaries.includes(boundary)"
+                                                >
+                                                    {{ boundary }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input
+                                            type="submit"
+                                            :value="creating ? 'Creating...' : 'Create'"
+                                        />
+                                    </fieldset>
+                                </form>
+                            </div>
                         </div>
-                        <div v-if="showInvitationMessage" class="invitation-message">
-                            Invitation sent!
-                        </div>
-                        
-
-                        <div class="messages-container">
-                            <graffiti-discover
-                                v-slot="{ objects: messageObjects, isInitialPolling }"
-                                :channels="messageChannels"
-                                :schema="{
-                                    properties: {
-                                        value: {
-                                            required: ['content', 'published'],
-                                            properties: {
-                                                content: { type: 'string' },
-                                                published: { type: 'number' },
-                                                isRumor: { type: 'boolean' }
-                                            }
-                                        }
-                                    }
-                                }"
-                            >
-                                <div v-if="isInitialPolling" class="loading">Loading...</div>
-                                <div v-else class="message-list">
-                                    <div
-                                        v-for="object of messageObjects.sort((a, b) => b.value.published - a.value.published)"
-                                        :key="object.url"
-                                        class="message"
-                                        :class="{ 'rumor-message': object.value.isRumor }"
-                                    >
-                                        <div class="message-sender clickable" @click="viewUserProfile(object.actor)">
-                                            {{ object.actor }}<span v-if="object.actor===$graffitiSession.value.actor">(you)</span>
-                                        </div>
-                                        <div class="message-content">
-                                            {{ object.value.content }}
-                                            <span v-if="object.value.isRumor" class="rumor-badge">RUMOR</span>
-                                        </div>
-                                        <div class="message-time">
-                                            {{ new Date(object.value.published).toLocaleTimeString() }}
-                                        </div>
-                                        <div v-if="object.actor===$graffitiSession.value.actor" class="message-actions">
-                                            <button @click="toggleRumor(object, $graffitiSession.value)">
-                                                {{ object.value.isRumor ? 'Unmark Rumor' : 'Mark as Rumor' }}
-                                            </button>
-                                            <button @click="editMessage(object, $graffitiSession.value)">Edit</button>
-                                            <button @click="deleteMessage(object, $graffitiSession.value)">Delete</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </graffiti-discover>
-                        </div>
-
-                        <form @submit.prevent="editingMessage ? saveEdit($graffitiSession.value) : sendMessage($graffitiSession.value)">
-                            <fieldset :disabled="sending">
-                                <input
-                                    type="text"
-                                    v-model="myMessage"
-                                    :placeholder="editingMessage ? 'Edit message...' : 'Type a message'"
-                                    ref="messageInput"
-                                    v-focus
-                                />
-                                <input
-                                    type="submit"
-                                    :value="sending ? 'Sending...' : (editingMessage ? 'Save Edit' : 'Send')"
-                                />
-                                <button v-if="editingMessage" @click="editingMessage = null">Cancel</button>
-                            </fieldset>
-                        </form>
-                    </div>
-                </template> 
+                    </template>
                 </div>
             </template>
+
+            <div v-if="showJoinInvitePrompt" class="invite-join-banner" style="background: #ffeeba; padding: 1em; margin: 1em 0; border: 1px solid #f0ad4e; border-radius: 5px; text-align: center;">
+                <span>
+                    Join group "{{ pendingInviteGroupName || pendingInviteGroupId }}"?
+                </span>
+                <button @click="joinPendingInviteGroup" style="margin-left: 1em;">Join</button>
+                <button @click="cancelGroupJoin" style="margin-left: 0.5em;">Cancel</button>
+            </div>
+
+            <div v-if="joinGroupError" class="error-message" style="background: #f8d7da; padding: 1em; margin: 1em 0; border: 1px solid #f5c6cb; border-radius: 5px; text-align: center;">
+                {{ joinGroupError }}
+                <button @click="clearJoinStates" style="margin-left: 0.5em;">Dismiss</button>
+            </div>
+
             </div>
         </div>
+
+        
 
         <script src="index.js" type="module"></script>
     </body>

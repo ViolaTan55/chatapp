@@ -92,10 +92,21 @@ li {
 }
 
 .header {
-    display:flex;
+    display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    padding: 0 20px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.header-actions .clickable {
+    margin: 0;
 }
 
 .message-actions {
@@ -161,10 +172,31 @@ li {
 }
 
 .message {
+    max-width: 60%;
+    margin: 0.5em 0;
+    padding: 0.5em 1em;
+    border-radius: 1em;
+    clear: both;
+    word-break: break-word;
+}
+
+.my-message {
     display: flex;
     flex-direction: column;
-    margin: 8px 0;
-    animation: fadeIn 0.3s ease-out;
+    align-items: flex-end; 
+    margin-left: auto;
+    margin-right: 0;
+    text-align: right; 
+  }
+
+.other-message {
+    /* background: #f0f0f0; */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: auto;
+    margin-left: 0;
+    text-align: left;
 }
 
 .message-content {
@@ -176,6 +208,19 @@ li {
 }
 
 .message-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.my-message-content {
+    background: #c7e6cb;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 70%;
+    transition: all 0.3s ease;
+}
+
+.my-message-content:hover {
     transform: translateY(-2px);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -684,7 +729,7 @@ li {
     animation: smoothTransition 0.4s ease-out;
 }
 
-/* Update existing styles to include animations */
+
 .message-content {
     background: #f0f2f5;
     padding: 8px 12px;
@@ -866,4 +911,231 @@ li {
 
 .message-actions button:hover {
     background-color: #e0e0e0;
+}
+
+.create-group-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 100px;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.create-group-form {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    animation: slideDown 0.3s ease-out;
+    transform-origin: top center;
+}
+
+.create-group-form h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #1a1a1a;
+}
+
+.create-group-form form {
+    margin: 0;
+}
+
+.create-group-form fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.create-group-form input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    margin: 0;
+}
+
+.create-group-form input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: #7cc686;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.create-group-form input[type="submit"]:hover {
+    background: #529c5c;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.create-group-trigger {
+    position: relative;
+    z-index: 1001;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px 10px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.close-button:hover {
+    color: #333;
+    background: none;
+}
+
+.invitations-header {
+    justify-content: space-between;
+}
+
+.invitations-header h2 {
+    flex: 1;
+    text-align: center;
+    margin: 0;
+}
+
+.invitations-header .clickable {
+    flex: 0 0 80px;
+}
+
+.my-message-fieldset {
+    background: transparent;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    width: 100%;
+}
+
+.other-message-fieldset {
+    background: transparent;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    border: none;
+}
+
+.my-message-input {
+    
+    border: 1px solid #7cc686;
+    color: #1a1a1a;
+    text-align: right;
+}
+
+.other-message-input {
+    
+    border: 1px solid #ccc;
+    color: #1a1a1a;
+    text-align: left;
+}
+
+.boundary-comparison-view {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.comparison-content {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.differences-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.differences-section h4 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.boundaries-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.boundary-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.comparison-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    justify-content: center;
+}
+
+.accept-button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.accept-button:hover {
+    background: #218838;
+}
+
+.cancel-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.cancel-button:hover {
+    background: #c82333;
 }
